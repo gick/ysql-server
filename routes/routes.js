@@ -2,7 +2,6 @@ module.exports = function(app, webdir,passport) {
 
 var express = require('express');
 app.use(express.static(webdir));
-
 app.get('/profile', function(req, res) {
     if (req.isAuthenticated()) {
         res.json({ success: true, user: req.user })

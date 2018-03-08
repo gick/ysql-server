@@ -6,6 +6,7 @@ var responseSchema = mongoose.Schema({
     response: String,
     dateTime:Date,
     user:String,
+    question: { type: Schema.Types.ObjectId, ref: 'Question' },
 })
 
 module.exports = mongoose.model('Response', responseSchema);

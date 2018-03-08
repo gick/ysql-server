@@ -5,6 +5,8 @@ var Schema = mongoose.Schema;
 
 var userSchema = mongoose.Schema({
     name: { type: String, required: true, unique: true },
+    isAdmin:{type:Boolean,default:false},
+    creationDate:Date,
     password: { type: String, required: true },
 });
 

@@ -82,8 +82,9 @@ module.exports = function(passport) {
                         var newUser = new User();
                         newUser.name = name;
                         newUser.password = newUser.generateHash(password);
-                        var isadmin = req.body.isadmin == "on"
-                        newUser.isadmin = isadmin;
+                        var isAdmin = req.body.isAdmin || false
+                        newUser.creationDate=new Date()
+                        newUser.isAdmin = isAdmin;
                         newUser.save(function(err) {
                             if (err)
                                 return done(err);
