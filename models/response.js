@@ -2,9 +2,10 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var responseSchema = mongoose.Schema({
-    number:String,
-    response: String,
+    number:Number,
+    response: Number,
     dateTime:Date,
+    ysqlSchema:String,
     user:String,
     question: { type: Schema.Types.ObjectId, ref: 'Question' },
 })

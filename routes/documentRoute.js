@@ -3,8 +3,7 @@ module.exports = function (app) {
     var Question = require('../models/question.js')
     var Response = require('../models/response.js')
     var User = require('../models/user.js')
-
-
+    var schemas=require('../config/questionSchemaRange.js')
     app.post('/changepass', function (req, res) {
         if (!req.isAuthenticated()) {
             return res.status(401).send()
@@ -19,13 +18,26 @@ module.exports = function (app) {
                     }
                     if (user) {
                         user.password = user.generateHash(req.body.password);
-                        user.save((err, ressource) => {
-                            res.send(ressource)
+                        user.save((err, result) => {
+                            res.send({success:true,ressource:result})
                         })
                     }
                 })
         }
     })
+
+    app.post('/adduser', function (req, res) {
+        if (!req.isAuthenticated()) {
+            return res.status(401).send()
+        }
+        let user = new User()
+        user.name = req.body.name
+        user.password = user.generateHash(req.body.password);
+        user.save((err, result) => {
+            res.send({success:true,ressource:result})
+        })
+    })
+
 
     app.delete('/user/:id', function (req, res) {
         if (!req.isAuthenticated()) {
@@ -38,19 +50,21 @@ module.exports = function (app) {
                 if (err) {
                     return res.send(err)
                 }
-                return res.send(result)
+                return res.send({success:true,resource:result})
             })
         }
 
     })
 
-    app.get('/responses/:userId',function(req,res){
-        Response.find({user:req.params.userId})
-                .populate('question')
-                .exec(function(err, results) {
-					res.send(results)
-				})
-			return
+    app.get('/responses/:userId', function (req, res) {
+        Response.find({
+                user: req.params.userId
+            })
+            .populate('question')
+            .exec(function (err, results) {
+                res.send(results)
+            })
+        return
     })
 
     app.get('/question/:number', function (req, res) {
@@ -107,15 +121,17 @@ module.exports = function (app) {
             })
             .exec(function (err, response) {
                 if (response && response.number) {
-                    response.response = req.body.response
+                    response.response = parseInt(req.body.response)
+                    response.question = req.body.questionId
                     response.save()
                     res.send(response)
                 } else {
                     let response = new Response()
-                    response.question=req.params.questionId
+                    response.question = req.body.questionId
+                    response.ysqlSchema=schemas(parseInt(req.params.number)).name
                     response.user = req.user._id
-                    response.number = req.params.number
-                    response.response = req.body.response
+                    response.number = parseInt(req.params.number)
+                    response.response = parseInt(req.body.response)
                     response.dateTime = new Date()
                     response.save()
                     res.send(response)
