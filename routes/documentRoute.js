@@ -1,5 +1,6 @@
 module.exports = function (app) {
     var mongoose = require('mongoose')
+    var Multimap = require('multimap')
     var Question = require('../models/question.js')
     var Response = require('../models/response.js')
     var User = require('../models/user.js')
@@ -62,6 +63,7 @@ module.exports = function (app) {
             })
             .populate('question')
             .exec(function (err, results) {
+                var m = new Multimap(['d','f'])
                 res.send(results)
             })
         return
