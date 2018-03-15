@@ -4,7 +4,12 @@ module.exports = function (app) {
     var Question = require('../models/question.js')
     var Response = require('../models/response.js')
     var User = require('../models/user.js')
-    var schemas=require('../config/questionSchemaRange.js')
+    var schemas = require('../config/questionSchemaRange.js')
+
+    /** Modify an user password.
+     *  Only available to admin
+     * @param password in the body request
+     */
     app.post('/changepass', function (req, res) {
         if (!req.isAuthenticated()) {
             return res.status(401).send()
@@ -20,7 +25,10 @@ module.exports = function (app) {
                     if (user) {
                         user.password = user.generateHash(req.body.password);
                         user.save((err, result) => {
-                            res.send({success:true,ressource:result})
+                            res.send({
+                                success: true,
+                                ressource: result
+                            })
                         })
                     }
                 })
@@ -35,11 +43,18 @@ module.exports = function (app) {
         user.name = req.body.name
         user.password = user.generateHash(req.body.password);
         user.save((err, result) => {
-            res.send({success:true,ressource:result})
+            res.send({
+                success: true,
+                ressource: result
+            })
         })
     })
 
-
+    /**
+     * Delete an unique user and all her data in the mongo backend
+     * Only available to admin
+     * @param userId
+     */
     app.delete('/user/:id', function (req, res) {
         if (!req.isAuthenticated()) {
             return res.status(401).send()
@@ -51,7 +66,10 @@ module.exports = function (app) {
                 if (err) {
                     return res.send(err)
                 }
-                return res.send({success:true,resource:result})
+                return res.send({
+                    success: true,
+                    resource: result
+                })
             })
         }
 
@@ -63,11 +81,70 @@ module.exports = function (app) {
             })
             .populate('question')
             .exec(function (err, results) {
-                var m = new Multimap(['d','f'])
-                res.send(results)
+                let resultArray = aggregateSchemas(results)
+                res.send(resultArray)
             })
         return
     })
+
+    /**
+     * Aggregate the user responses by schemas (ED,AB...)
+     * For each schemas, compute the score based on responses
+     * 
+     * @param {array} results 
+     * @returns An array of JSON containing responses aggregated by schema and their scores
+     */
+    aggregateSchemas = function (results) {
+        var m = new Multimap()
+        for (var i = 0; i < results.length; i++) {
+            m.set(results[i].ysqlSchema, {
+                question: results[i].question.question,
+                response: results[i].response
+            })
+        }
+        var resultArray = []
+        for (let entry of m.keys()) {
+            resultArray.push({
+                schema: entry,
+                questions: m.get(entry)
+            })
+        }
+        /**
+         * Compute, for each schemas, the number of responses  
+         * 4, 5 and 6. Used to calculate schemas scores
+         *  
+         */
+        for (let i = 0; i < resultArray.length; i++) {
+            var currentSchema = resultArray[i]
+            var fourResponses = 0
+            var fiveResponses = 0
+            var sixResponses = 0
+
+            for (let j = 0; j < currentSchema.questions.length; j++) {
+                switch (currentSchema.questions[j].response) {
+                    case 4:
+                        fourResponses = fourResponses + 1
+                        break;
+                    case 5:
+                        fiveResponses = fiveResponses + 1
+                        break;
+                    case 6:
+                        sixResponses = sixResponses + 1
+                        break;
+                }
+                currentSchema.detailedScore = {
+                    four: fourResponses,
+                    five: fiveResponses,
+                    six: sixResponses
+                }
+
+                currentSchema.score=fourResponses*4+fiveResponses*5+sixResponses*6
+
+            }
+        }
+
+        return resultArray
+    }
 
     app.get('/question/:number', function (req, res) {
         if (!req.isAuthenticated()) {
@@ -130,7 +207,7 @@ module.exports = function (app) {
                 } else {
                     let response = new Response()
                     response.question = req.body.questionId
-                    response.ysqlSchema=schemas(parseInt(req.params.number)).name
+                    response.ysqlSchema = schemas(parseInt(req.params.number)).name
                     response.user = req.user._id
                     response.number = parseInt(req.params.number)
                     response.response = parseInt(req.body.response)

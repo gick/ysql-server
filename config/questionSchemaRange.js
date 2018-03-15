@@ -18,14 +18,14 @@ schemas.push({
 })
 schemas.push({
     name:'FA', 
-    pages:new MultiRange('54-68').toArray()
-})
-schemas.push({
-    name:'DI', 
     pages:new MultiRange('69-77').toArray()
 })
 schemas.push({
     name:'DS', 
+    pages:new MultiRange('54-68').toArray()
+})
+schemas.push({
+    name:'DI', 
     pages:new MultiRange('78-92').toArray()
 })
 schemas.push({
@@ -83,4 +83,15 @@ getSchema=function(questionNumber)
         return true
     })
 }
-module.exports=getSchema
+getRange=function(schemaCode)
+{
+   return schemas.find((value)=>{
+        let index=value.name.indexOf(schemaCode)
+        if(index===-1){
+            return false
+        }
+        return true
+    })
+}
+
+module.exports={schemaByNumber:getSchema,schemaByCode:getRange}
