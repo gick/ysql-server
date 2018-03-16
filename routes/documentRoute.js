@@ -87,6 +87,17 @@ module.exports = function (app) {
         return
     })
 
+    app.get('/responsesCompleted/:userId', function (req, res) {
+        Response.find({
+                user: req.params.userId
+            })
+            .exec(function (err, results) {
+                res.send({completed:results.length})
+            })
+        return
+    })
+
+
     /**
      * Aggregate the user responses by schemas (ED,AB...)
      * For each schemas, compute the score based on responses
@@ -207,7 +218,7 @@ module.exports = function (app) {
                 } else {
                     let response = new Response()
                     response.question = req.body.questionId
-                    response.ysqlSchema = schemas(parseInt(req.params.number)).name
+                    response.ysqlSchema = schemas.schemaByNumber(parseInt(req.params.number)).name
                     response.user = req.user._id
                     response.number = parseInt(req.params.number)
                     response.response = parseInt(req.body.response)
