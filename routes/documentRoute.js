@@ -4,6 +4,7 @@ module.exports = function (app) {
     var Question = require('../models/question.js')
     var Response = require('../models/response.js')
     var User = require('../models/user.js')
+    var YsqlSchema = require('../models/ysqlSchema.js')
     var schemas = require('../config/questionSchemaRange.js')
 
     /** Modify an user password.
@@ -97,6 +98,24 @@ module.exports = function (app) {
         return
     })
 
+
+    app.get('/ysqlSchema/:schemaCode', function (req, res) {
+        YsqlSchema.findOne({
+                code: req.params.schemaCode
+            })
+            .exec(function (err, schema) {
+                res.send({schema:schema})
+            })
+        return
+    })
+
+    app.get('/ysqlSchemas', function (req, res) {
+        YsqlSchema.find()
+            .exec(function (err, schemas) {
+                res.send({schema:schemas})
+            })
+        return
+    })
 
     /**
      * Aggregate the user responses by schemas (ED,AB...)
