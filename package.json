@@ -15,6 +15,7 @@
     "express": "^4.16.2",
     "express-session": "^1.15.6",
     "expressjs": "^1.0.1",
+    "json2csv": "^4.0.2",
     "json2xls": "^0.1.2",
     "mongoose": "^5.0.9",
     "multi-integer-range": "^4.0.4",

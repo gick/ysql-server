@@ -1,4 +1,4 @@
-module.exports = function (app) {
+module.exports = function (app,jsonParser) {
     var mongoose = require('mongoose')
     var Multimap = require('multimap')
     var Question = require('../models/question.js')
@@ -87,6 +87,34 @@ module.exports = function (app) {
             })
         return
     })
+
+    app.get('/responsesCsv/:userId', function (req, res) {
+        Response.find({
+                user: req.params.userId,  response: { $gt: 3 } 
+            })
+            .populate('question')
+            .exec(function (err, results) {
+                let resultArray = aggregateSchemas(results)
+                let properCsv = prettyCsv(resultArray)
+                res.xls('data.xls',properCsv)
+            })
+        return
+    })
+
+
+    let prettyCsv=function(resultArray){
+        let csvArray=[]
+        for(var i=0;i<resultArray.length;i++){
+            let currentItem={}
+            currentItem.Schema=resultArray[i].schema
+            currentItem['Score 4']=resultArray[i].detailedScore.four
+            currentItem['Score 5']=resultArray[i].detailedScore.five
+            currentItem['score 6']=resultArray[i].detailedScore.six
+            currentItem['Score final']=resultArray[i].score
+            csvArray.push(currentItem)
+        }
+        return csvArray
+    }
 
     app.get('/responsesCompleted/:userId', function (req, res) {
         Response.find({

@@ -12,7 +12,7 @@ app.get('/profile', function(req, res) {
 });
 app.get('/logout', function(req, res) {
     req.logout();
-    res.redirect('/');
+    res.send({success:true,msg:'Logout success'});
 });
 app.post('/login', passport.authenticate('local-login', {
     successRedirect: '/profile', // if authentification succeeds, /profile will return user info
