@@ -157,6 +157,7 @@ module.exports = function (app,jsonParser) {
         for (var i = 0; i < results.length; i++) {
             m.set(results[i].ysqlSchema, {
                 question: results[i].question.question,
+                questionIndex:results[i].question.number,
                 response: results[i].response
             })
         }
